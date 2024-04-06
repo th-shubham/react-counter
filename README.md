@@ -51,3 +51,111 @@ Commit - a0d78934dc39361941ebae62ab64da6ce9588e26
 #### Conclusion
 
 Overall, the code demonstrates a solid understanding of React's basics. However, as applications grow in complexity, embracing more of React's ecosystem (hooks like `useReducer`, `useMemo`, and external libraries for date manipulation) and following best practices for maintainability, testing, and scalability becomes increasingly important. Balancing immediate simplicity with long-term maintainability is key to successful React development.
+
+## Basics
+
+Certainly! Let's break down some of the key concepts used in the refactored `App` component and provide small, focused tutorials for each.
+
+### 1. **useState Hook**
+
+The `useState` hook lets you add state to functional components. When you call this hook, you provide the initial state, and it returns a pair: the current state value and a function that lets you update it.
+
+```jsx
+import React, { useState } from "react";
+
+function Counter() {
+	const [count, setCount] = useState(0);
+
+	return (
+		<div>
+			<p>You clicked {count} times</p>
+			<button onClick={() => setCount(count + 1)}>Click me</button>
+		</div>
+	);
+}
+```
+
+### 2. **useMemo Hook**
+
+`useMemo` will only recompute the memoized value when one of the dependencies has changed. This optimization helps to avoid expensive calculations on every render.
+
+```jsx
+import React, { useMemo } from "react";
+
+function Fibonacci({ n }) {
+	const fib = useMemo(() => calculateFib(n), [n]); // `calculateFib` is a hypothetical function to calculate Fibonacci numbers
+
+	return (
+		<div>
+			Fibonacci of {n} is {fib}
+		</div>
+	);
+}
+```
+
+### 3. **useCallback Hook**
+
+`useCallback` returns a memoized callback. This is useful when passing callbacks to optimized child components that rely on reference equality to prevent unnecessary renders.
+
+```jsx
+import React, { useCallback, useState } from "react";
+
+function IncrementButton() {
+	const [count, setCount] = useState(0);
+
+	const increment = useCallback(() => {
+		setCount((c) => c + 1);
+	}, []);
+
+	return <button onClick={increment}>Increment</button>;
+}
+```
+
+### 4. **Date Manipulation with date-fns**
+
+`date-fns` provides simple and consistent toolset for manipulating JavaScript dates in a browser & Node.js.
+
+```javascript
+import { format, addDays } from "date-fns";
+
+const today = new Date();
+console.log(format(today, "yyyy-MM-dd")); // Formats today's date
+
+const tomorrow = addDays(today, 1);
+console.log(format(tomorrow, "yyyy-MM-dd")); // Adds a day
+```
+
+### 5. **React.memo for Performance Optimization**
+
+`React.memo` is a higher order component. It’s similar to `React.PureComponent` but for function components instead of classes. If your component renders the same result given the same props, you can wrap it in a call to `React.memo` for a performance boost in some cases by memoizing the result.
+
+```jsx
+import React, { memo } from "react";
+
+const MyComponent = memo(function MyComponent(props) {
+	/* render using props */
+});
+```
+
+### 6. **CSS Modules for Component-level Styles**
+
+CSS Modules let you use CSS classes similarly to local scoped styles. It automatically generates unique class names. When you import a CSS Module into a JavaScript module, it exports an object with all class names mapped to the generated unique names.
+
+```css
+/* AppStyles.module.css */
+.container {
+	margin: auto;
+	width: 50%;
+}
+```
+
+```jsx
+import React from "react";
+import styles from "./AppStyles.module.css";
+
+function App() {
+	return <div className={styles.container}>Hello, world!</div>;
+}
+```
+
+These tutorials cover the foundational concepts used in the refactored `App` component, helping you understand how each part works and how they come together in a modern React application.
