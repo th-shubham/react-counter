@@ -1,4 +1,4 @@
-export const Page = {
+export const PageStyle = {
 	fontSize: "18px",
 	height: "50vh",
 	display: "flex",

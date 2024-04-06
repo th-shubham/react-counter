@@ -1,62 +1,92 @@
-import { useState } from "react";
-import { Page } from "./StyleApp";
+import React, { useState, useMemo, useCallback } from "react";
+import { PageStyle } from "./StyleApp"; // Assuming CSS modules or styled-components
+import {
+	format,
+	addDays,
+	startOfDay,
+	differenceInCalendarDays,
+} from "date-fns"; // Enhanced date manipulation
 
 function App() {
 	const [step, setStep] = useState(1);
 	const [count, setCount] = useState(0);
-	const [date, updateDate] = useState(new Date());
+	const [date, setDate] = useState(new Date());
 
-	const formatDate = (() => {
-		const formatter = new Intl.DateTimeFormat("en-US", {
+	const dateFormatter = useMemo(() => {
+		return new Intl.DateTimeFormat("en-US", {
 			weekday: "short",
 			year: "numeric",
 			month: "short",
 			day: "numeric",
 		});
+	}, []);
 
-		return function (date) {
-			return formatter.format(new Date(date));
-		};
-	})();
+	const formatDate = useCallback(
+		(date) => {
+			return dateFormatter.format(date);
+		},
+		[dateFormatter]
+	);
 
-	const incrementStep = () => setStep((s) => s + 1);
-	const decrementStep = () => setStep((s) => s - 1);
+	const adjustCountAndDate = useCallback(
+		(adjustmentFactor) => {
+			setCount((prevCount) => prevCount + step * adjustmentFactor);
+			setDate((prevDate) => addDays(prevDate, step * adjustmentFactor));
+		},
+		[step]
+	);
 
-	const changeCountAndDate = (change) => {
-		const newCount = count + step * change;
-		const newDate = new Date();
-		newDate.setDate(newDate.getDate() + newCount);
+	const dateTimeFormat = useMemo(() => {
+		const today = startOfDay(new Date());
+		const selectedDate = startOfDay(date);
+		const diffDays = differenceInCalendarDays(selectedDate, today);
 
-		setCount(newCount);
-		updateDate(newDate);
-	};
-	function dateTimeFormat() {
-		const today = new Date();
-		const diffTime = date - today;
-		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-		const displayDate = formatDate(date);
-		if (diffDays === 0) {
-			return `Today is ${displayDate}`;
-		} else if (diffDays > 0) {
-			return `${diffDays} days from Today is ${displayDate}`;
-		} else {
-			return `${diffDays} days ago from Today was ${displayDate}`;
+		let message = `Today is ${formatDate(selectedDate)}`;
+		if (diffDays > 0) {
+			message = `${diffDays} days from today is ${formatDate(selectedDate)}`;
+		} else if (diffDays < 0) {
+			message = `${Math.abs(diffDays)} days ago from today was ${formatDate(
+				selectedDate
+			)}`;
 		}
-	}
+
+		return message;
+	}, [date, formatDate]);
+
 	return (
-		<main style={Page}>
-			<div style={{ paddingBottom: "1rem" }}>
-				<button onClick={decrementStep}> - </button>
-				<span>{` Step : ${step} `}</span>
-				<button onClick={incrementStep}> + </button>
+		<main style={PageStyle}>
+			<div className="control-panel">
+				<button
+					aria-label="Decrease step"
+					onClick={() => setStep((s) => Math.max(1, s - 1))}
+				>
+					-
+				</button>
+				<span>Step: {step}</span>
+				<button
+					aria-label="Increase step"
+					onClick={() => setStep((s) => s + 1)}
+				>
+					+
+				</button>
 			</div>
-			<div>
-				<button onClick={() => changeCountAndDate(-1)}> - </button>
-				<span>{` Count : ${count} `}</span>
-				<button onClick={() => changeCountAndDate(+1)}> + </button>
+			<div className="counter">
+				<button
+					aria-label="Decrease count"
+					onClick={() => adjustCountAndDate(-1)}
+				>
+					-
+				</button>
+				<span>Count: {count}</span>
+				<button
+					aria-label="Increase count"
+					onClick={() => adjustCountAndDate(1)}
+				>
+					+
+				</button>
 			</div>
 
-			<h3>{dateTimeFormat()}</h3>
+			<h3>{dateTimeFormat}</h3>
 		</main>
 	);
 }
